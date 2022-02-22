@@ -19,7 +19,7 @@ SetScrollLockState, AlwaysOff ;ScrollLock 常にOFF
 ;SetWinDelay, 0 ;Window操作の時間差0
 DetectHiddenWindows, On ;ウィンドウ探索時に非表示になっているウィンドウを検出対象にするか
 
-#include D:\SOFT\util\MacroCreatorPortable\_AutoHotkey\Lib\_AutoHotInterception\Lib\AutoHotInterception.ahk
+#include \Lib\AutoHotInterception.ahk
 
 
 ;同梱monitor.ahkでキーボードのIDとスキャンコードを調べる
@@ -32,6 +32,7 @@ return
 
 
 ;----------------------------------------------------------------------------
+
 #if cm1.IsActive
 
 Tab::
