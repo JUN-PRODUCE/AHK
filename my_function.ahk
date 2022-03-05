@@ -248,3 +248,35 @@ SeDebugPrivilege()  {
 }
 
 ;----------------------------------------------------------
+;短縮URLの展開
+
+URL_Expand(vURL) {
+req := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+req.Open("HEAD", "%vURL%")
+req.Option(6) := False ; Disable auto redirect
+req.Send()
+MsgBox, % req.GetResponseHeader("Location") ;URLだけ取得
+; MsgBox, % req.getAllResponseHeaders() ;すべての HTTP 応答ヘッダーを取得
+}
+
+;----------------------------------------------------------
+; ホットキーでプログラムのフルパスを渡すと
+; 起動されていれば、
+; プログラムをアクテイブにする。
+; すでに、アクテイブなら最小化する。
+; 起動されていなければ、起動する。
+; #1::RunActivateMinimize("notepad.exe")
+; #2::RunActivateMinimize("notepad.exe", "test.txt") 引数渡せる
+
+RunActivateMinimize(exePass, exeOption="") {
+  SplitPath, exePass, exeName
+    Process, Exist, %exeName%
+    Sleep, 200
+    If (ErrorLevel != 0)
+    IfWinNotActive, ahk_pid %ErrorLevel%
+        WinActivate, ahk_pid %ErrorLevel%
+    else
+      WinMinimize, ahk_pid %ErrorLevel%
+    else
+      Run, %exePass% %exeOption%
+}
