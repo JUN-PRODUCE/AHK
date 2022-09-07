@@ -1,0 +1,81 @@
+;ホットスリング
+:*:mmm::MsgBox,,,%%
+:*:ttt::ToolTip, %%
+:*:rrr::Return
+:*R:nnn::``n
+:*:/22::""{left 1}
+:*:/55::%%{left 1}
+:*:/88::(){left 1}
+
+;選択範囲をgoogle検索　Ctr+Shift+マウス中ボタン
+^+MButton::
+	Clipboard := ""
+	Send, ^c
+	Sleep, 30
+	GoSub, Chrome_Search_fork
+Return
+
+;選択範囲をAHK検索　Ctr+Alt+Shift+マウス中ボタン
+^+!MButton::
+	Clipboard := ""
+	Send, ^c
+	Sleep, 30
+	Run, https://sites.google.com/site/autohotkeyjp/system/app/pages/search?scope=search-site&q=%Clipboard%
+	WinActivate, ahk_exe chrome.exe
+Return
+
+;選択範囲をWizFile検索　Ctr+Alt+マウス中ボタン
+^!MButton::
+	SetKeyDelay, -1
+	Critical, On
+	BlockInput, On
+	Clipboard := ""
+	Send, ^c
+	Sleep, 30
+	WinActivate, ahk_class TfrmWizFileMain ahk_exe WizFile64.exe
+	PostMessage, 0x0111, 2,,,A ;クリア(&L)	F6
+	Sleep, 30
+	Send, ^v
+	IME_SET(1) ;IME ON
+	BlockInput, Off
+	Critical, Off
+Return
+
+;AHK KeyHistory Alt+Ctr+Shft+F10
+^+#F10::KeyHistory
+
+;AHK緊急停止 Ctrl+Shift+Alt+Escape
+^+#Escape::
+	suspend
+	pause, toggle, 1
+	if (A_IsSuspended = 1) { ;サスペンド中
+		my_tooltip_function("● AHKスタンバイ", 950)
+		SoundPlay("standby.mp3")
+		Return
+	} else if (A_IsSuspended = 0) { ;再開
+		my_tooltip_function("● AHKスタート", 950)
+		SoundPlay("all_system_ready.mp3")
+	}
+Return
+
+;保存成功tooltip
+~^s::
+	if (WinActive("ahk_exe emeditor.exe") || WinActive("- Google Chrome")) {
+		send, ^s
+		my_tooltip_function("● 保存成功", 950)
+	Return
+	}
+	else if (WinActive("_AutoHotkey - Visual Studio Code")) {
+		send, ^s
+		my_tooltip_function("● ＡＨＫ 更新完了！", 950)
+		SoundPlay("chocobo.mp3")
+		Reload
+	Return
+	}
+Return
+
+;アプリのEXEフォルダーを開く in Folder（SmartSystemMenu経由）
+^+#E::
+	PostMessage, 0x0112, 18435,,,A
+	my_tooltip_function("● Explorerで開く", 950)
+Return
