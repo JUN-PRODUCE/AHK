@@ -402,6 +402,7 @@ Chrome_Translate() {
   Sleep, 80
   Send, {NumpadRight}
   Send, {LButton}
+  Critical, Off
 }
 
 ;----------------------------------------------------------
@@ -443,9 +444,11 @@ Process_Low(Process_p2){ ;既にそのプロセスが存在している場合
 
 ;----------------------------------------------------------
 ;Alt+Tab一覧からソフトを消す
-AltTab_Remover:
-	WinGet, vExeName, ProcessName, A
-	if (RegExMatch(vExeName, "i)^(chrome|code|AutoHotkeyU64|explorer|javaw)$"))
+; AltTab_Remover("ahk_class MozillaWindowClass") ;firefox.exe
+
+AltTab_Remover(VExe) {
+	WinGet, VExeName, ProcessName, %VExe%
+	if (RegExMatch(VExeName, "i)^(chrome|code|AutoHotkeyU64|explorer|javaw)$"))
 	{ ;除外プロセス
 		my_tooltip_function("AltTab_Remover 禁止ソフト", 1500)
 		Notify("AltTab_Remover 禁止ソフト", "", -2, "Style=HugeRed")
@@ -455,7 +458,7 @@ AltTab_Remover:
 	{
 		; ToolTip, %vExeName%
 		data:= {}
-		winget hw, id, a
+		winget hw, id, %VExe%
 		if ((hw != "") && (hw != 0)) {
 			if (data[hw]) {
 				winset exstyle, % data[hw], ahk_id %hw%
@@ -468,7 +471,20 @@ AltTab_Remover:
 		}
 	}
 return
+}
 
+;----------------------------------------------------------
+; キャレットが表示されたらIME ON
+Caret_IME() {
+	if (A_CaretX > 1)
+	{
+		IME_SET(1)
+	}
+	else
+	{
+		IME_SET(0)
+	}
+}
 
 ;----------------------------------------------------------
 ; Explorer 選択ファイル2 フルパス
@@ -529,6 +545,7 @@ RunActivateMinimize(exePass, exeOption="") {
 ; Topic:          https://www.autohotkey.com/boards/viewtopic.php?f=6&t=78587
 ; Sript version:  1.0
 ; AHK Version:    1.1.24.03 (A32/U32/U64)
+; TIPS:[Class] WinHookと組み合わせて使用
 
 ;Dimmer_box("ahk_exe foobar2000.exe")
 
