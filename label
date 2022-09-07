@@ -50,7 +50,8 @@ Return
 
 ;----------------------------------------------------------
 ;半角スペース/改行を削除
-; ShareX
+; ShareX OCRの文字処理対策
+
 OCR_Jp_Fix:
 Critical, On
 WinWait, ShareX - Optical character recognition,, 2
@@ -72,9 +73,64 @@ Return
 
 
 
+;----------------------------------------------------------
+;Chrome検索分岐
+Chrome_Search_fork:
+	if (RegExMatch(Clipboard, "(http|ftp)"))
+		{
+			Run, %gChrome%chrome.exe "%Clipboard%", %gChrome%,,
+			Return
+		}
+	Else
+		{ ;URLじゃない場合検索
+			Run, https://www.google.com/search?q=%Clipboard%
+			Return
+}
 
 
+;----------------------------------------------------------
+; テキスト処理
+
+bracket3: ; ""
+Send ^c
+Sleep, 40
+str := clipboard
+str := """" . str . """"
+clipboard := str
+Sleep, 40
+Send ^v
+return
+
+bracket7: ; []
+Send ^c
+Sleep, 40
+str := clipboard
+str := "[" . str . "]"
+; str := RegExReplace(str, "\.", "].[")
+clipboard := str
+Sleep, 40
+Send ^v
+Return
 
 
+bracket8: ; ()
+Send ^c
+Sleep, 40
+str := clipboard
+str := "(" . str . ")"
+; str := RegExReplace(str, "\.", ").(")
+clipboard := str
+Sleep, 40
+Send ^v
+Return
 
-
+bracket9: ; %%
+Send ^c
+Sleep, 40
+str := clipboard
+str := "%" . str . "%"
+; str := RegExReplace(str, "\.", "%.%")
+clipboard := str
+Sleep, 40
+Send ^v
+Return
