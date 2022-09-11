@@ -474,17 +474,55 @@ return
 }
 
 ;----------------------------------------------------------
-; キャレットが表示されたらIME ON
-Caret_IME() {
-	if (A_CaretX > 1)
+;----------------------------------------------------------
+; 片手矢印 操作時のIME処理
+; wasd_IME("up") ;無変換押しながらwasd
+
+wasd_IME(cmd) {
+	if (A_CaretX > 1) ;キャレット有
 	{
-		IME_SET(1)
+		if (IME_GET == 1) ;IME On
+		{
+			GoSub, key_%cmd%
+			IME_SET(1)
+			Return
+		}
+		else if (IME_GET == 0) ;IME Off
+		{
+			GoSub, key_%cmd%
+			IME_SET(0)
+			Return
+		}
 	}
-	else
+	else ;キャレット無
 	{
+		GoSub, key_%cmd%
 		IME_SET(0)
+		Return
 	}
+
+
+	key_up:
+	my_tooltip_function_Caret("↑", 150)
+	Send, {Blind}{Up}
+	Return
+
+	key_down:
+	my_tooltip_function_Caret("↓", 150)
+	Send, {Blind}{Down}
+	Return
+
+	key_left:
+	my_tooltip_function_Caret("←", 150)
+	Send, {Blind}{Left}
+	Return
+
+	key_right:
+	my_tooltip_function_Caret("→", 150)
+	Send, {Blind}{Right}
+	Return
 }
+
 
 ;----------------------------------------------------------
 ; Explorer 選択ファイル2 フルパス
@@ -597,4 +635,18 @@ Dimmer_box_Off:
 	idlist:=excludelist:=dimcount:=winid:=""
 
 return
+}
+
+
+;----------------------------------------------------------
+; simple_countdown(30) 30秒 ToolTip版同梱
+simple_countdown(cd) {
+	Loop % cd ;カウントとあわせないとマイナスになる
+	{
+		;ToolTip, % (cd+1) - A_Index ; A_Index を使用する場合、1 2 3 から始まります。
+		SplashImage,,B1 FS40 WS900 W70, % (cd+1) - A_Index
+		Sleep 1000 ;１秒
+	}
+	;ToolTip, 0
+	SplashImage, Off
 }
