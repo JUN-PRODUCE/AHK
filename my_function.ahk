@@ -191,7 +191,7 @@ GetFilePath() {
 	WinGet, vGetFilePath_App, ProcessPath, A
 	obj := GetCommandLine(PID, true, true)
 	vGetFilePath_Full = % obj.cmd
-	vGetFilePath_File := RegexReplace(vGetFilePath_Full, "\x22.*\x22\s|\x22", "") ;アプリパス削除
+	vGetFilePath_File := RegexReplace(vGetFilePath_Full, "\x22.*\x22\s|\x22", "") ;アプリパス＆""削除
 }
 
 GetCommandLine(PID, SetDebugPrivilege := false, GetImagePath := false) {
