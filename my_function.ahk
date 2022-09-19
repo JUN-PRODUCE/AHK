@@ -178,11 +178,21 @@ return
 
 ;----------------------------------------------------------
 ;プロセスのコマンドラインを取得
-; a::
-;   WinGet, PID, PID, A
-;   obj := GetCommandLine(PID, true, true)
-;   MsgBox, % "CommandLine = " obj.cmd "`nImagePath = " obj.path
-;   Return
+; 1::
+; GetFilePath()
+; ToolTip, % vGetFilePath_Full "`n`n" vGetFilePath_App "`n`n" vGetFilePath_File
+; Return
+
+GetFilePath() {
+	global vGetFilePath_Full ;全コマンドライン
+	global vGetFilePath_App ;アプリパス
+	global vGetFilePath_File ;ファイルパス
+	WinGet, PID, PID, A
+	WinGet, vGetFilePath_App, ProcessPath, A
+	obj := GetCommandLine(PID, true, true)
+	vGetFilePath_Full = % obj.cmd
+	vGetFilePath_File := RegexReplace(vGetFilePath_Full, "\x22.*\x22\s|\x22", "") ;アプリパス削除
+}
 
 GetCommandLine(PID, SetDebugPrivilege := false, GetImagePath := false) {
 	static SetDebug := 0, PROCESS_QUERY_INFORMATION := 0x400, PROCESS_VM_READ := 0x10, STATUS_SUCCESS := 0
@@ -443,7 +453,9 @@ Process_Low(Process_p2){ ;既にそのプロセスが存在している場合
 
 
 ;----------------------------------------------------------
-;Alt+Tab一覧からソフトを消す
+; Alt+Tab一覧からソフトを消す
+; https://learn.microsoft.com/ja-jp/windows/win32/winmsg/extended-window-styles
+; WS_EX_TOOLWINDOW 0x00000080L
 ; AltTab_Remover("ahk_class MozillaWindowClass") ;firefox.exe
 
 AltTab_Remover(VExe) {
@@ -473,34 +485,40 @@ AltTab_Remover(VExe) {
 return
 }
 
-;----------------------------------------------------------
+
 ;----------------------------------------------------------
 ; 片手矢印 操作時のIME処理
-; wasd_IME("up") ;無変換押しながらwasd
+; #Include %A_ScriptDir%\Lib\Acc1.ahk
+; wasd_IME("up") ;無変換押しながらwasd Chrome対応版(Electron)
 
-wasd_IME(cmd) {
-	if (A_CaretX > 1) ;キャレット有
+; #Include %A_ScriptDir%\Lib\Acc1.ahk
+
+wasd_IME(vKey) {
+Acc_Caret := Acc_ObjectFromWindow(WinExist("ahk_class Chrome_WidgetWin_1"), OBJID_CARET := 0xFFFFFFF8)
+Caret_Location := Acc_Location(Acc_Caret)
+; Caret_Location.x
+; Caret_Location.y
+; ToolTip, % Caret_Location.x "`n" Caret_Location.y "`n" A_CaretX
+	if (Caret_Location.x > 0 or Caret_Location.y >= -1 or A_CaretX >= 1) ;キャレット有
+	; if (A_CaretX > 0) ;簡易版
 	{
 		if (IME_GET == 1) ;IME On
 		{
-			GoSub, key_%cmd%
+			GoSub, key_%vKey%
 			IME_SET(1)
-			Return
 		}
-		else if (IME_GET == 0) ;IME Off
+		else ;IME Off
 		{
-			GoSub, key_%cmd%
+			GoSub, key_%vKey%
 			IME_SET(0)
-			Return
 		}
 	}
 	else ;キャレット無
 	{
-		GoSub, key_%cmd%
+		GoSub, key_%vKey%
 		IME_SET(0)
-		Return
 	}
-
+}
 
 	key_up:
 	my_tooltip_function_Caret("↑", 150)
@@ -521,7 +539,6 @@ wasd_IME(cmd) {
 	my_tooltip_function_Caret("→", 150)
 	Send, {Blind}{Right}
 	Return
-}
 
 
 ;----------------------------------------------------------
